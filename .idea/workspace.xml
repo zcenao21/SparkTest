@@ -5,17 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="468c12cd-eb98-4fc8-8213-515b8fda5bca" name="变更" comment="">
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/codeStyles/Project.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/codeStyles/codeStyleConfig.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/spark-core/pom.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/spark-core/src/main/java/com/will/spark/core/ScalaTest.scala" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/spark-core/src/main/java/com/will/spark/core/WordCount.scala" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/spark-core/src/main/resources/input.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/spark-core/src/main/java/com/will/spark/core/TextFileTest.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spark-core/src/main/java/com/will/spark/core/WordCount.scala" beforeDir="false" afterPath="$PROJECT_DIR$/spark-core/src/main/java/com/will/spark/core/WordCount.scala" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

@@ -2,7 +2,7 @@ package com.will.spark.core
 
 import org.apache.spark.{SparkConf, SparkContext}
 
-object WordCount {
+object TextFileTest {
     def main(args: Array[String]): Unit = {
         val conf = new SparkConf().setMaster("local[*]").setAppName("Spark Word Count")
         val sc = new SparkContext(conf)
