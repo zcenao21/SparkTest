@@ -5,11 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="468c12cd-eb98-4fc8-8213-515b8fda5bca" name="变更" comment="">
-      <change afterPath="$PROJECT_DIR$/spark-core/src/main/java/com/will/spark/core/GlomTest.scala" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/spark-core/src/main/resources/num.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/spark-core/src/main/java/com/will/spark/core/TextFileTest.scala" beforeDir="false" afterPath="$PROJECT_DIR$/spark-core/src/main/java/com/will/spark/core/TextFileTest.scala" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/spark-core/src/main/java/com/will/spark/core/WordCount.scala" beforeDir="false" afterPath="$PROJECT_DIR$/spark-core/src/main/java/com/will/spark/core/WordCount.scala" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -159,6 +155,16 @@
           <url>jar://$MAVEN_REPOSITORY$/org/apache/hadoop/hadoop-mapreduce-client-core/2.7.4/hadoop-mapreduce-client-core-2.7.4-sources.jar!/org/apache/hadoop/mapred/LineRecordReader.java</url>
           <line>241</line>
           <option name="timeStamp" value="6" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="scala-line">
+          <url>file://$PROJECT_DIR$/spark-core/src/main/java/com/will/spark/core/GlomTest.scala</url>
+          <line>20</line>
+          <option name="timeStamp" value="11" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="scala-line">
+          <url>file://$PROJECT_DIR$/spark-core/src/main/java/com/will/spark/core/GlomTest.scala</url>
+          <line>21</line>
+          <option name="timeStamp" value="12" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
