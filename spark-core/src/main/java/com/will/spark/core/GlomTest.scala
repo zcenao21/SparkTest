@@ -1,6 +1,5 @@
 package com.will.spark.core
 
-import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.{SparkConf, SparkContext}
 
 object GlomTest {
