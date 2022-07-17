@@ -21,6 +21,10 @@ object GlomTest {
         res.foreach(line=>{
             println(line)
         })
+
+        // glom实现分区最大值求和。分区内求最大值，分区间求和
+        println(rddIn.glom().map(_.max).collect().sum)
+
         sc.stop()
     }
 }
