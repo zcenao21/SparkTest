@@ -10,11 +10,10 @@ object SQLTest {
         val spark = SparkSession
             .builder()
             .appName("Spark SQL basic example")
-            .config("spark.some.config.option", "some-value")
             .getOrCreate()
 
         spark.read.json("spark-core/src/main/resources/student.json").createOrReplaceTempView("student")
-        spark.sql("select name from student where age>1").show()
+        spark.sql("select name from student where age>10").show()
 
         // $example off:init_session$
         //    runInferSchemaExample(spark)
