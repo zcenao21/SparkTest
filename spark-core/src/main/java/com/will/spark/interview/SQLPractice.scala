@@ -9,9 +9,40 @@ object SQLPractice {
     def main(args: Array[String]): Unit = {
         val spark = initEnv()
 
-        getAllStudentsAllGradesGTAvg(spark)
+        // getAllStudentsAllGradesGTAvg(spark)
+        // activeUserAvgAge(spark)
 
         spark.stop()
+    }
+
+
+
+    /**
+     * 活跃用户平均年龄
+     * 活跃用户指连续两天登录
+     */
+    def activeUserAvgAge(spark:SparkSession): Unit ={
+        spark.read.option("header",true).csv("spark-core/src/main/resources/interview/active_user.csv").createOrReplaceTempView("user")
+        spark.sql(
+            """
+              |select
+              |    avg(age)
+              |from
+              |(
+              |    select
+              |        distinct user
+              |        ,age
+              |    from
+              |    (
+              |        select
+              |            user
+              |            ,age
+              |            ,datediff(date,lag(date, 1, "1970-01-01") over (partition by user order by date asc)) diff
+              |        from user
+              |    ) a where diff=1
+              |) b
+              |""".stripMargin
+        ).show()
     }
 
     /**
