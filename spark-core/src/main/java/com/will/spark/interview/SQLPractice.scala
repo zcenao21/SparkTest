@@ -11,11 +11,50 @@ object SQLPractice {
 
         // getAllStudentsAllGradesGTAvg(spark)
         // activeUserAvgAge(spark)
+        continuesLogin(spark)
 
         spark.stop()
     }
 
 
+
+    /**
+     * 连续登录天数
+     * 如果中间差一天也算连续
+     * 如2022-01-01， 2022-01-03， 2022-01-04为连续登录4天
+     */
+    def continuesLogin(spark:SparkSession): Unit ={
+        spark.read.option("header",true).csv("spark-core/src/main/resources/interview/login_log.csv").createOrReplaceTempView("login")
+        spark.sql(
+            """
+              |select
+              |    c.id
+              |    ,max(datediff(last_date,first_date))+1 as succ_login_date
+              |from
+              |(
+              |    select
+              |        b.id
+              |        ,first_value(b.dt) over (partition by id,sum_flag) as first_date
+              |        ,last_value(b.dt) over (partition by id,sum_flag) as last_date
+              |    from
+              |    (
+              |        select
+              |            a.id
+              |            ,a.dt
+              |            ,sum(flag) over (partition by id order by dt) as sum_flag
+              |        from
+              |        (
+              |            select
+              |                id
+              |                ,dt
+              |                ,if(datediff(dt,lag(dt,1,"1970-01-01") over (partition by id order by dt))<3,0,1) as flag
+              |            from login
+              |        ) a
+              |    ) b
+              |) c group by 1
+              |""".stripMargin
+        ).show()
+    }
 
     /**
      * 活跃用户平均年龄
