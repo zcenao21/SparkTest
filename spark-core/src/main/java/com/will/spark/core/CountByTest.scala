@@ -1,5 +1,6 @@
 package com.will.spark.core
 
+import org.apache.spark.storage.StorageLevel
 import org.apache.spark.{SparkConf, SparkContext}
 
 object CountByTest {
@@ -9,6 +10,7 @@ object CountByTest {
 
         // 结果：Map(4 -> 1, 2 -> 1, 1 -> 1, 3 -> 1)
         val rddIn = sc.parallelize(List(1,2,3,4),2)
+        rddIn.persist(StorageLevel.OFF_HEAP)
         val intToLong = rddIn.countByValue()
         println(intToLong)
 

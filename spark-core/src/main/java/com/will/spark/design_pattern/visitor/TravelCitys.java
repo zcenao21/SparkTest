@@ -1,6 +1,4 @@
-package com.will.spark.sql.relate;
-
-import org.apache.hadoop.yarn.webapp.hamlet2.Hamlet;
+package com.will.spark.design_pattern.visitor;
 
 public class TravelCitys {
     City[] cities;
