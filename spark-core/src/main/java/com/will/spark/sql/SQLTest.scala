@@ -16,13 +16,22 @@ object SQLTest {
             .getOrCreate()
         import spark.implicits._
 
-        spark.read.json("spark-core/src/main/resources/student.json").createOrReplaceTempView("student")
-        spark.sql("select name from student where age>10").show()
-
-        // $example off:init_session$
-        //    runInferSchemaExample(spark)
-        //    runProgrammaticSchemaExample(spark)
-
+        spark.read.json("spark-core/src/main/resources/employee.json").createOrReplaceTempView("employee")
+        spark.sql(
+            """
+              |   select
+              |        ifnull(
+              |         (select
+              |        salary as 'SecondHighestSalary'
+              |    from
+              |    (
+              |        select
+              |            salary
+              |            ,rank() over (order by salary desc) as r
+              |        from Employee
+              |    ) a where r=2 limit 1),null) as SecondHighestSalary
+              |
+              |""").show()
         spark.stop()
     }
 }
