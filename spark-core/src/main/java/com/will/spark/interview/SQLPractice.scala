@@ -11,11 +11,108 @@ object SQLPractice {
 
         // getAllStudentsAllGradesGTAvg(spark)
         // activeUserAvgAge(spark)
-        continuesLogin(spark)
+        //continuesLogin(spark)
+        //secondHighestSalary(spark)
+        //scoreRank(spark)
+        consecutiveNumbers(spark)
 
         spark.stop()
     }
 
+    /**
+     * 连续出现的数字
+     */
+    def consecutiveNumbers(spark: SparkSession): Unit = {
+        spark.read.option("header", true).csv("spark-core/src/main/resources/interview/logs.csv").createOrReplaceTempView("logs")
+        spark.sql(
+            """
+              | select
+              |    distinct ConsecutiveNums as ConsecutiveNums
+              |from
+              |(
+              |    select
+              |        diff
+              |        ,num
+              |        ,count(1) as cnt
+              |        ,max(num) as ConsecutiveNums
+              |    from
+              |    (
+              |        select
+              |            num
+              |            ,id-rn as diff
+              |        from
+              |        (
+              |            select
+              |                id
+              |                ,num
+              |                ,row_number() over (partition by num order by id asc) as rn
+              |            from logs
+              |        ) a
+              |    ) b group by 1,2 having cnt>=3
+              |) c
+              |
+              |""".stripMargin
+//            """
+//              |select
+//              |    distinct if(num==lag_1_num and num==lag_2_num,num,null) ConsecutiveNums
+//              |from
+//              |(
+//              |    select
+//              |        id
+//              |        ,num
+//              |        ,lag(num,1) over (order by id asc) as lag_1_num
+//              |        ,lag(num,2) over (order by id asc) as lag_2_num
+//              |    from logs
+//              |) a
+//              |where if(num==lag_1_num and num==lag_2_num,num,null)!=null
+//              |
+//              |""".stripMargin
+        ).show()
+    }
+
+    /**
+     * 分数排名
+     */
+    def scoreRank(spark: SparkSession): Unit = {
+        spark.read.option("header", true).csv("spark-core/src/main/resources/interview/scores.csv").createOrReplaceTempView("scores")
+        spark.sql(
+            """
+              |select
+              |    score
+              |    ,dense_rank() over (order by score desc) as `rank`
+              |from scores
+              |""".stripMargin
+        ).show()
+    }
+
+    /**
+     * 第二高的薪水
+     * 需要考虑的情况：
+     *  没有数据返回null
+     *  总共一条，没有第二高 返回null
+     *  总共多条，但是薪水一样 返回null
+     *  第二有多条一样的数据，返回一条
+     */
+    def secondHighestSalary(spark: SparkSession): Unit = {
+        spark.read.option("header", true).csv("spark-core/src/main/resources/interview/employee.csv").createOrReplaceTempView("employee")
+        spark.sql(
+            """
+              |select
+              |        ifnull(
+              |            (
+              |                select
+              |                    salary as `SecondHighestSalary`
+              |                from
+              |                (
+              |                    select
+              |                        salary
+              |                        ,dense_rank() over (order by salary desc) as r
+              |                    from Employee
+              |                ) a where r=2 limit 1
+              |            ),null) as SecondHighestSalary
+              |""".stripMargin
+        ).show()
+    }
 
 
     /**
