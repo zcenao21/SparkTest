@@ -9,9 +9,49 @@ object SQLPractice {
     def main(args: Array[String]): Unit = {
         val spark = initEnv()
 
-        revRank(spark)
+        accVistCnt(spark)
 
         spark.stop()
+    }
+
+    /**
+     * 计算l累计访问次数
+     * @param spark
+     */
+    def accVistCnt(spark: SparkSession): Unit = {
+        spark.read.option("header", true).csv("spark-core/src/main/resources/interview/user_visit.csv").createOrReplaceTempView("user_visit")
+        spark
+            .sql(
+                """
+                  |
+                  |
+                  |with temp_mon_visit as (
+                  |    select
+                  |        user_id
+                  |        ,concat(split(visit_date,"/")[0],lpad(split(visit_date,"/")[1],2,"0")) as mon
+                  |        ,sum(visit_count) as mv
+                  |    from user_visit
+                  |    group by 1,2
+                  |),
+                  |temp_total_visit as (
+                  |    select
+                  |        user_id
+                  |        ,sum(mv) as tv
+                  |    from temp_mon_visit
+                  |    group by 1
+                  |)
+                  |
+                  |select
+                  |    a.user_id
+                  |    ,a.mon
+                  |    ,a.mv
+                  |    ,b.tv
+                  |from temp_mon_visit a
+                  |left join temp_total_visit b on a.user_id = b.user_id
+                  |order by 1,2
+                  |
+                  |""".stripMargin)
+            .show()
     }
 
     /**
@@ -288,6 +328,43 @@ object SQLPractice {
         spark.read.option("header", true).csv("spark-core/src/main/resources/interview/grades.csv").createOrReplaceTempView("grade")
         spark.sql(
             """
+              |
+              |with temp_grade as (
+              |    select
+              |        id
+              |        ,course
+              |        ,grade
+              |        ,avg(grade) over (partition by course) as avg_grade
+              |    from grade
+              |)
+              |
+              |select
+              |    id
+              |from temp_grade
+              |group by 1
+              |having max(if(grade>avg_grade, 0,1))=0
+              |
+              |""".stripMargin
+        ).show()
+
+        spark.sql(
+            """
+              |
+              |with temp_grade as (
+              |    select
+              |        id
+              |        ,course
+              |        ,grade
+              |        ,avg(grade) over (partition by course) as avg_grade
+              |    from grade
+              |)
+              |
+              |select
+              |    id
+              |    ,course
+              |    ,max(avg_grade)
+              |from temp_grade
+              |group by 1,2
               |
               |""".stripMargin
         ).show()
