@@ -9,14 +9,113 @@ object SQLPractice {
     def main(args: Array[String]): Unit = {
         val spark = initEnv()
 
-        // getAllStudentsAllGradesGTAvg(spark)
-        // activeUserAvgAge(spark)
-        //continuesLogin(spark)
-        //secondHighestSalary(spark)
-        //scoreRank(spark)
-        consecutiveNumbers(spark)
+        revRank(spark)
 
         spark.stop()
+    }
+
+    /**
+     * 将每个用户的所有粉丝列表逆序
+     * @param spark
+     */
+    def revRank(spark: SparkSession): Unit = {
+        spark.read.option("header", true).csv("spark-core/src/main/resources/interview/fans_rev.csv").createOrReplaceTempView("fans")
+
+        //              |select
+        //              |    uid
+        //              |    ,concat_ws("",collect_list(fan)) as fan_list_rev
+        //              |from
+        //              |(
+        //              |    select
+        //              |        a.uid
+        //              |        ,a.fan
+        //              |    from
+        //              |    (
+        //              |        select
+        //              |            uid
+        //              |            ,r
+        //              |            ,fan
+        //              |        from fans
+        //              |        lateral view posexplode(split(fan_list,"")) as r,fan
+        //              |        where length(fan)>0
+        //              |    ) a
+        //              |    distribute by uid sort by r desc
+        //              |) a
+        //              |group by 1
+        //              |order by 1 asc
+    }
+
+    /**
+     * 将用户好友按照分数聚合在一行，并按分数降序排序
+     * 有个用户好友表：字段如下
+     * uid  fans_uid   score
+     * 返回：uid, fans_uid_list【fans_uid的拼接串，按照score降序拼接】
+     *
+     * 比如返回如下结果：
+     *  1	[c,d,a,e,b]
+     *  2	[e,a,b,d,c]
+     *  3	[a,c,b]
+     */
+    def fansByScoreRank(spark: SparkSession): Unit = {
+        spark.read.option("header", true).csv("spark-core/src/main/resources/interview/fans.csv").createOrReplaceTempView("fans")
+//        spark.sql(
+//            """
+//              |
+//              |with tmp_fan as (
+//              |    select
+//              |        uid
+//              |        ,fans_uid
+//              |        ,row_number() over (partition by uid order by score desc) as r
+//              |    from fans
+//              |)
+//              |
+//              |select
+//              |    uid
+//              |    ,split(regexp_replace(concat_ws(":",array_sort(collect_list(concat(lpad(r,5,'0'),fans_uid)))),"0+\\d",""),":") as fan_list
+//              |from tmp_fan
+//              |group by 1
+//              |order by 1
+//              |""".stripMargin)
+//            .show()
+
+//        spark.sql(
+//            """
+//              |select
+//              |    uid
+//              |    ,collect_list(fans_uid)
+//              |from
+//              |(
+//              |    select
+//              |        uid
+//              |        ,fans_uid
+//              |    from fans
+//              |    distribute by uid
+//              |    sort by uid asc,score desc
+//              |) a
+//              |group by uid
+//              |""".stripMargin)
+//            .explain()
+
+        spark.sql(
+            """
+              |
+              |select
+              |    uid
+              |    ,split(regexp_replace(concat_ws(":",array_sort(collect_list(concat(concat(lpad(r,5,'0'),"-"),fans_uid)))),"\\d+-",""),":") fans_list
+              |from
+              |(
+              |    select
+              |        uid
+              |        ,fans_uid
+              |        ,row_number() over (partition by uid order by cast(score as int) desc) as r
+              |    from fans
+              |) a
+              |group by 1
+              |order by 1
+              |
+              |""".stripMargin
+        ).show()
+
     }
 
     /**
@@ -52,21 +151,21 @@ object SQLPractice {
               |) c
               |
               |""".stripMargin
-//            """
-//              |select
-//              |    distinct if(num==lag_1_num and num==lag_2_num,num,null) ConsecutiveNums
-//              |from
-//              |(
-//              |    select
-//              |        id
-//              |        ,num
-//              |        ,lag(num,1) over (order by id asc) as lag_1_num
-//              |        ,lag(num,2) over (order by id asc) as lag_2_num
-//              |    from logs
-//              |) a
-//              |where if(num==lag_1_num and num==lag_2_num,num,null)!=null
-//              |
-//              |""".stripMargin
+            //            """
+            //              |select
+            //              |    distinct if(num==lag_1_num and num==lag_2_num,num,null) ConsecutiveNums
+            //              |from
+            //              |(
+            //              |    select
+            //              |        id
+            //              |        ,num
+            //              |        ,lag(num,1) over (order by id asc) as lag_1_num
+            //              |        ,lag(num,2) over (order by id asc) as lag_2_num
+            //              |    from logs
+            //              |) a
+            //              |where if(num==lag_1_num and num==lag_2_num,num,null)!=null
+            //              |
+            //              |""".stripMargin
         ).show()
     }
 
@@ -88,10 +187,10 @@ object SQLPractice {
     /**
      * 第二高的薪水
      * 需要考虑的情况：
-     *  没有数据返回null
-     *  总共一条，没有第二高 返回null
-     *  总共多条，但是薪水一样 返回null
-     *  第二有多条一样的数据，返回一条
+     * 没有数据返回null
+     * 总共一条，没有第二高 返回null
+     * 总共多条，但是薪水一样 返回null
+     * 第二有多条一样的数据，返回一条
      */
     def secondHighestSalary(spark: SparkSession): Unit = {
         spark.read.option("header", true).csv("spark-core/src/main/resources/interview/employee.csv").createOrReplaceTempView("employee")
@@ -120,8 +219,8 @@ object SQLPractice {
      * 如果中间差一天也算连续
      * 如2022-01-01， 2022-01-03， 2022-01-04为连续登录4天
      */
-    def continuesLogin(spark:SparkSession): Unit ={
-        spark.read.option("header",true).csv("spark-core/src/main/resources/interview/login_log.csv").createOrReplaceTempView("login")
+    def continuesLogin(spark: SparkSession): Unit = {
+        spark.read.option("header", true).csv("spark-core/src/main/resources/interview/login_log.csv").createOrReplaceTempView("login")
         spark.sql(
             """
               |select
@@ -157,8 +256,8 @@ object SQLPractice {
      * 活跃用户平均年龄
      * 活跃用户指连续两天登录
      */
-    def activeUserAvgAge(spark:SparkSession): Unit ={
-        spark.read.option("header",true).csv("spark-core/src/main/resources/interview/active_user.csv").createOrReplaceTempView("user")
+    def activeUserAvgAge(spark: SparkSession): Unit = {
+        spark.read.option("header", true).csv("spark-core/src/main/resources/interview/active_user.csv").createOrReplaceTempView("user")
         spark.sql(
             """
               |select
@@ -184,27 +283,19 @@ object SQLPractice {
     /**
      * 得到所有科目成绩都大于该科目平均成绩的学生
      */
-    def getAllStudentsAllGradesGTAvg(spark:SparkSession): Unit ={
+    def getAllStudentsAllGradesGTAvg(spark: SparkSession): Unit = {
         import spark.implicits._
-        spark.read.option("header",true).csv("spark-core/src/main/resources/interview/grades.csv").createOrReplaceTempView("grade")
+        spark.read.option("header", true).csv("spark-core/src/main/resources/interview/grades.csv").createOrReplaceTempView("grade")
         spark.sql(
             """
-              |select
-              |    id
-              |from
-              |(
-              |    select
-              |        id
-              |        ,grade
-              |        ,avg(grade) over (partition by course ) as avg_grade
-              |    from grade
-              |) a group by id having sum(if(grade>avg_grade,0,1))=0
+              |
               |""".stripMargin
         ).show()
     }
-    case class StudentGrade(id:String, course:String, grade:Long)
 
-    def initEnv(): SparkSession ={
+    case class StudentGrade(id: String, course: String, grade: Long)
+
+    def initEnv(): SparkSession = {
         val conf = new SparkConf().setMaster("local[*]").setAppName("SQLTest")
         val spark = SparkSession
             .builder()

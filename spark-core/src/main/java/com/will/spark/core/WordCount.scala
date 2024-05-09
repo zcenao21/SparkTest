@@ -9,6 +9,7 @@ object WordCount {
 
         val rddIn = sc.textFile("spark-core/src/main/resources/num.txt",3)
         rddIn.saveAsTextFile("output")
+
         sc.stop()
     }
 }
